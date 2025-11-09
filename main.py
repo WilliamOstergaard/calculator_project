@@ -1,24 +1,24 @@
 import math
+from operations import *
 print("Welcome to WILLY CALC!")
-
-user_input = input("Enter calculation: ")
-
-def add(x,y):
-    return x + y
-
-def sub(x,y):
-    return x - y
-
-def mult(x,y):
-    return x * y
-
-def div(x,y):
-    if y == 0:
-        return "Error! Division by zero."
-    return x / y
+print("Current possible calculations:")
+print("+, -, * , /, ^, sqrt()")
+print("All follow PEMDAS")
+print("")
 
 def calculation(expression):
-    #Checks if there are () in expression
+    #Checks if there are sqrt()s in expression
+    while 'sqrt(' in expression:
+        start = expression.find('sqrt(')
+        end = expression.find(')',start)
+        
+        inner = expression[start+5:end]
+        
+        inner_result = calculation(inner) ** 0.5
+        
+        expression = expression[:start] + str(inner_result) + expression[end+1:]
+
+    #Checks if there are () in expression, NOT including sqrt()
     while '(' in expression:
         start_parenth = expression.rfind('(')
         end_parenth = expression.find(')', start_parenth)
@@ -28,27 +28,27 @@ def calculation(expression):
         inner_result = calculation(inner)
 
         expression = expression[:start_parenth] + str(inner_result) + expression[end_parenth+1:]
-
+    
     numbers_list = []
     operators_list = []
     current_number = ""
 
     #Checks operators in expression
     for char in expression:
-        if char.isdigit():
+        if char.isdigit() or char == '.':
             current_number += char
         
         elif char in ['+','-','*','/','^']:
             operator = char
-            num_as_int = int(current_number)
-            numbers_list.append(num_as_int)
+            num_as_float = float(current_number)
+            numbers_list.append(num_as_float)
             current_number = ""
             operators_list.append(operator)
-    num_as_int = int(current_number)
-    numbers_list.append(num_as_int)
+    num_as_float = float(current_number)
+    numbers_list.append(num_as_float)
 
 
-    #Calculates the operations
+    #Calculates in order of PEMDAS
 
     i = 0
 
@@ -94,5 +94,12 @@ def calculation(expression):
             i += 1
     return numbers_list[0]
 
-result = calculation(user_input)
-print(f"Result: {result}")
+#Quitting Calculator, and else returns results
+while True: 
+    user_input = input("Enter calculation: (or type 'quit' or 'q' to exit) ")
+    if user_input.lower() in ['quit','q','exit']:
+        print("Goodbye!")
+        break
+    result = calculation(user_input)
+    print(f"Result: {result}")
+    print("")
