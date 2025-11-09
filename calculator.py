@@ -2,45 +2,28 @@ import math
 from operations import *
 
 def calculation(expression):
-    #Checks if there are sqrt()s in expression
-    while 'sqrt(' in expression:
-        start = expression.find('sqrt(')
-        end = expression.find(')',start)
-        
-        inner = expression[start+5:end]
-        
-        inner_result = calculation(inner) ** 0.5
-        
-        expression = expression[:start] + str(inner_result) + expression[end+1:]
+    #Library of all possible functions
+    functions = {
+        'sqrt': lambda x: x ** 0.5,
+        'log': lambda x: math.log(x,10),
+        'log2': lambda x: math.log(x,2),
+        'ln': lambda x: math.log(x),
+        'sin': lambda x: math.sin(x),
+        'cos': lambda x: math.cos(x),
+        'tan': lambda x: math.tan(x)
+    }
 
-    
-    #application of log10, 2 and base e
-    while 'log(' in expression:
-        start = expression.find('log(')
-        end = expression.find(')',start)
-            
-        inner = expression[start+4:end]
-        inner_result = math.log(calculation(inner), 10)
+    for func_name, func in functions.items():
+        while f'{func_name}(' in expression:
+            start = expression.find(f'{func_name}(')
+            end = expression.find(')', start)
+            inner = expression[start+len(func_name)+1:end]
 
-        expression = expression[:start] + str(inner_result) + expression[end+1:]
+            inner_result = func(calculation(inner))
 
-    while 'log2(' in expression:
-        start = expression.find('log2(')
-        end = expression.find(')',start)
-            
-        inner = expression[start+5:end]
-        inner_result = math.log(calculation(inner), 2)
+            expression = expression[:start] + str(inner_result) + expression[end+1:]
 
-        expression = expression[:start] + str(inner_result) + expression[end+1:]
 
-    while 'ln(' in expression:
-        start = expression.find('ln(')
-        end = expression.find(')',start)
-            
-        inner = expression[start+3:end]
-        inner_result = math.log(calculation(inner))
-
-        expression = expression[:start] + str(inner_result) + expression[end+1:]
 
     #Checks if there are () in expression, NOT including sqrt()
     while '(' in expression:
@@ -52,6 +35,7 @@ def calculation(expression):
         inner_result = calculation(inner)
 
         expression = expression[:start_parenth] + str(inner_result) + expression[end_parenth+1:]
+
     
     numbers_list = []
     operators_list = []
@@ -62,7 +46,10 @@ def calculation(expression):
     for char in expression:
         if char.isdigit() or char == '.':
             current_number += char
-        
+        elif char == '-' and (not current_number and not numbers_list):
+            current_number += char
+        elif char == '-' and not current_number and operators_list:
+            current_number += char
         elif char in ['+','-','*','/','^']:
             operator = char
             num_as_float = float(current_number)
